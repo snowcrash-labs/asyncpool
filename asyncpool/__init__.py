@@ -67,7 +67,7 @@ class AsyncPool:
                 future, args, kwargs = item
                 # the wait_for will cancel the task (task sees CancelledError) and raises a TimeoutError from here
                 # so be wary of catching TimeoutErrors in this loop
-                result = await asyncio.wait_for(self._worker_co(*args, **kwargs), self._max_task_time, loop=self._loop)
+                result = await asyncio.wait_for(self._worker_co(*args, **kwargs), self._max_task_time)
 
                 if future:
                     future.set_result(result)
