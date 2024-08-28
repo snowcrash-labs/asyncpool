@@ -114,7 +114,7 @@ class AsyncPool:
         if self._job_accept_duration is not None and (utc_now() - self._first_push_dt) > self._job_accept_duration:
             raise TimeoutError("Maximum lifetime of {} seconds of AsyncWorkerPool: {} exceeded".format(self._job_accept_duration, self._name))
 
-        future = asyncio.futures.Future(loop=self._loop) if self._return_futures else None
+        future = asyncio.futures.Future() if self._return_futures else None
         await self._queue.put((future, args, kwargs))
         self._total_queued += 1
 
@@ -128,7 +128,7 @@ class AsyncPool:
         assert self._workers is None
         self._exceptions = False
 
-        self._workers = [asyncio.ensure_future(self._worker_loop(), loop=self._loop) for _ in range(self._num_workers)]
+        self._workers = [asyncio.ensure_future(self._worker_loop()) for _ in range(self._num_workers)]
 
     async def join(self):
         # no-op if workers aren't running
@@ -142,7 +142,7 @@ class AsyncPool:
             await self._queue.put(Terminator())
 
         try:
-            await asyncio.gather(*self._workers, loop=self._loop)
+            await asyncio.gather(*self._workers)
             self._workers = None
         except:
             self._logger.exception('Exception joining {}'.format(self._name))
